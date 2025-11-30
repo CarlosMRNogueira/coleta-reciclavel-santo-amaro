@@ -18,6 +18,8 @@ import androidx.core.app.NotificationCompat;
 
 public class CadastrarNotificacaoActivity extends ComponentActivity {
 
+    private Spinner spBairro;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,19 +36,17 @@ public class CadastrarNotificacaoActivity extends ComponentActivity {
                 Toast.makeText(this,
                         "Ative 'Alarmes Precisos' e volte para agendar.",
                         Toast.LENGTH_LONG).show();
-                return; // impede crash
             }
         }
 
-        Spinner spBairro = findViewById(R.id.spBairro);
+        spBairro = findViewById(R.id.spBairro);
         CheckBox cb07 = findViewById(R.id.cb07);
         CheckBox cb19 = findViewById(R.id.cb19);
         Button btnAgendar  = findViewById(R.id.btnAgendar);
         Button btnVoltar = findViewById(R.id.btnVoltar);
 
-        spBairro.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item,
-                DataProvider.getBairros()));
+        // 🔥 CARREGAMENTO SEGURO DO SPINNER
+        carregarSpinner();
 
         btnAgendar.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= 31) {
@@ -60,7 +60,6 @@ public class CadastrarNotificacaoActivity extends ComponentActivity {
                     Toast.makeText(this,
                             "Ative 'Alarmes Precisos' e volte para tentar novamente.",
                             Toast.LENGTH_LONG).show();
-                    return;
                 }
             }
 
@@ -80,9 +79,8 @@ public class CadastrarNotificacaoActivity extends ComponentActivity {
             if (cb19.isChecked())
                 NotificationUtils.scheduleWeeklyReminder(this, dias, 19, 0, NotificationUtils.REQ_EVENING);
 
-            //
-            // TESTE DE 1 MINUTO PARA O VÍDEO
-            //
+
+            // TESTE DE 1 MINUTO
             new android.os.Handler().postDelayed(() -> {
                 Notification n = new NotificationCompat.Builder(
                         this, NotificationUtils.CHANNEL_ID)
@@ -95,11 +93,34 @@ public class CadastrarNotificacaoActivity extends ComponentActivity {
                 ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
                         .notify(9999, n);
             }, 60 * 1000);
-            // --------------------------------------------------
 
-            Toast.makeText(this, "Lembrete(s) agendado(s) para 1 dia antes.", Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(this,
+                    "Lembrete(s) agendado(s) para 1 dia antes.",
+                    Toast.LENGTH_SHORT).show();
         });
 
         btnVoltar.setOnClickListener(v -> finish());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // GARANTE QUE O SPINNER VOLTE CARREGADO APÓS PERMISSÃO
+        carregarSpinner();
+    }
+
+    // MÉTODO QUE SEMPRE CARREGA O SPINNER COM SEGURANÇA
+    private void carregarSpinner() {
+        try {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    DataProvider.getBairros()
+            );
+            spBairro.setAdapter(adapter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

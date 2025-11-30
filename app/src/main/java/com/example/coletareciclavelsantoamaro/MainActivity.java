@@ -36,7 +36,7 @@ public class MainActivity extends ComponentActivity {
                 startActivity(new Intent(this, ConsultaActivity.class)));
 
         btnAgendar.setOnClickListener(v ->
-                startActivity(new Intent(this, CadastrarNotificacaoActivity.class)));
+                startActivity(new Intent(this, PermissaoActivity.class)));
 
         btnCancelar.setOnClickListener(v -> {
             NotificationUtils.cancelAll(this);
