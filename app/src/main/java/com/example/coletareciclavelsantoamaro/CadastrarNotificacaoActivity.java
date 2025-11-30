@@ -23,9 +23,6 @@ public class CadastrarNotificacaoActivity extends ComponentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastrar);
 
-        // ------------------------------------------------------------
-        // 🟣 PERMISSÃO OBRIGATÓRIA PARA ALARMES PRECISOS (Android 12+)
-        // ------------------------------------------------------------
         if (Build.VERSION.SDK_INT >= 31) {
             AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -52,6 +49,21 @@ public class CadastrarNotificacaoActivity extends ComponentActivity {
                 DataProvider.getBairros()));
 
         btnAgendar.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= 31) {
+                AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+                if (!am.canScheduleExactAlarms()) {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                    intent.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(intent);
+
+                    Toast.makeText(this,
+                            "Ative 'Alarmes Precisos' e volte para tentar novamente.",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
             String bairro = (String) spBairro.getSelectedItem();
             int[] dias = DataProvider.getRecicladoWeekdays(bairro);
 

@@ -81,7 +81,11 @@ public class DataProvider {
         RECICLADO_WEEKDAYS.put(bairro, w);
     }
 
-    public static List<String> getBairros(){ return Arrays.asList(BAIRROS); }
+    public static List<String> getBairros(){
+        List<String> lista = new ArrayList<>(Arrays.asList(BAIRROS));
+        Collections.sort(lista, String.CASE_INSENSITIVE_ORDER);
+        return lista;
+    }
 
     public static String[] getRecicladoLinhas(String bairro){
         String[] v = RECICLADO_LINHAS.get(bairro);
